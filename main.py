@@ -32,7 +32,6 @@ def main():
             "model": MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "response_format": json_schema,
-            "tools": [{"type": "openrouter:web_search"}],
         },
     )
 
