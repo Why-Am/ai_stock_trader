@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+
 from openrouter import OpenRouter
 import requests
 from fake_stock_portfolio import FakeStockPortfolio
@@ -18,7 +21,8 @@ def main():
         "You are a stock trading AI that is run every day.\n"
         "Your job is to maximize returns in trading US stocks.\n"
         "Search the web to get information to inform your trades.\n"
-        "The following is the state of your portfolio."
+        "You will only be able to respond once, so make all of your trades then.\n"
+        "The following is the state of your portfolio.\n"
         f"{portfolio.describe()}"
     )
 
@@ -45,9 +49,10 @@ def main():
         },
     )
 
-    print(response)
-    print("---")
     print(response.json()["choices"][0]["message"]["content"])
+    with open("last_response.txt", "w", encoding="utf-8") as file:
+        file.write(f"{datetime.now().isoformat()}\n")
+        file.write(json.dumps(response.json(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
