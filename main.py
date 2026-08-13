@@ -1,7 +1,6 @@
 from datetime import datetime
 import json
 
-from openrouter import OpenRouter
 import requests
 from fake_stock_portfolio import FakeStockPortfolio
 from json_schema import json_schema
@@ -26,16 +25,6 @@ def main():
         f"{portfolio.describe()}"
     )
 
-    # TODO: If I go with requests, remove the dependency on openrouter
-    # with OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY")) as client:
-    #     response = client.chat.send(
-    #         model=MODEL,
-    #         messages=[{"role": "user", "content": prompt}],
-    #         response_format=
-    #     )
-
-    #     print(response.choices[0].message.content)
-
     response = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
@@ -43,9 +32,7 @@ def main():
             "model": MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "response_format": json_schema,
-            "tools": [
-                {"type": "openrouter:web_search"}
-            ]
+            "tools": [{"type": "openrouter:web_search"}],
         },
     )
 
