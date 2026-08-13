@@ -1,6 +1,7 @@
 import finnhub
 import os
 
+
 class FakeStockPortfolio:
     def __init__(self, money_available_to_trade: float, finnhub_api_key: str):
         self.money_available_to_trade = money_available_to_trade
@@ -45,7 +46,9 @@ class FakeStockPortfolio:
             raise Exception(f"There is no holding for `{ticker}`.")
 
         if amount > self.holdings[ticker]:
-            raise Exception(f"Unable to sell more stock than is held ({amount} > {self.holdings[ticker]}).")
+            raise Exception(
+                f"Unable to sell more stock than is held ({amount} > {self.holdings[ticker]})."
+            )
 
         if amount == self.holdings[ticker]:
             self.sell_all(ticker)
@@ -63,6 +66,7 @@ class FakeStockPortfolio:
         current_price = self.get_current_price(ticker)
         amount = self.holdings.pop(ticker)
         self.money_available_to_trade += current_price * amount
+
 
 def main():
     """Command line interaction with FakeStockPortfolio"""
@@ -109,6 +113,7 @@ def main():
                     print(f"Error selling: {e}")
             case _:
                 print("Invalid action.")
-        
+
+
 if __name__ == "__main__":
     main()
