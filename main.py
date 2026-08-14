@@ -5,6 +5,8 @@ import requests
 from fake_stock_portfolio import FakeStockPortfolio
 from json_schema import json_schema
 import os
+import finnhub
+from tool_manager import ToolManager
 
 MODEL = "openrouter/free"
 
@@ -15,30 +17,74 @@ def main():
         raise Exception(
             "Cannot get the FINNHUB_API_KEY environment variable. Make sure it is set."
         )
-    portfolio = FakeStockPortfolio(500, finnhub_api_key)
+    finnhub_client = finnhub.Client(finnhub_api_key)
+    portfolio = FakeStockPortfolio(500, finnhub_client)
+    tool_manager = ToolManager(finnhub_client)
+
     prompt = (
         "You are a stock trading AI that is run every day.\n"
         "Your job is to maximize returns in trading US stocks.\n"
-        "Search the web to get information to inform your trades.\n"
-        "You will only be able to respond once, so make all of your trades then.\n"
-        "The following is the state of your portfolio.\n"
-        f"{portfolio.describe()}"
+        "The following is the latest market news:\n"
+        f"{finnhub_client.general_news("general")}\n\n"
+        "The following is the state of your portfolio:\n"
+        f"{portfolio.describe()}\n\n"
+        "You can only use the `get_stock_quote` tool in your first response, "
+        "so make calls for every stock you want to know about.\n"
+        "You will execute the trades in your second response in JSON format.\n"
     )
 
-    response = requests.post(
+    messages = [{"role": "system", "content": prompt}]
+
+    response_1 = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
         json={
             "model": MODEL,
-            "messages": [{"role": "user", "content": prompt}],
+            "tools": tool_manager.tools,
+            "messages": messages,
+            # "response_format": json_schema,
+        },
+    )
+
+    with open("log/response_1.txt", "w", encoding="utf-8") as file:
+        file.write(json.dumps(response_1.json(), ensure_ascii=False, indent=2))
+
+    response_1 = response_1.json()["choices"][0]["message"]
+
+    messages.append(response_1)
+
+    for tool_call in response_1["tool_calls"]:
+        tool_name = tool_call["function"]["name"]
+        tool_args = json.loads(tool_call["function"]["arguments"])
+        tool_response = tool_manager.run_tool(tool_name, tool_args)
+
+        messages.append(
+            {
+                "role": "tool",
+                "tool_call_id": tool_call["id"],
+                "content": json.dumps(tool_response),
+            }
+        )
+
+    response_2 = requests.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
+        json={
+            "model": MODEL,
+            "messages": messages,
             "response_format": json_schema,
         },
     )
 
-    print(response.json()["choices"][0]["message"]["content"])
-    with open("last_response.txt", "w", encoding="utf-8") as file:
-        file.write(f"{datetime.now().isoformat()}\n")
-        file.write(json.dumps(response.json(), ensure_ascii=False, indent=2))
+    print(response_2.json()["choices"][0]["message"]["content"])
+
+    with open("log/response_2.txt", "w", encoding="utf-8") as file:
+        file.write(json.dumps(response_2.json(), ensure_ascii=False, indent=2))
+
+    messages.append(response_2.json()["choices"][0]["message"])
+
+    with open("log/messages.txt", "w", encoding="utf-8") as file:
+        file.write(json.dumps(messages, indent=2))
 
 
 if __name__ == "__main__":

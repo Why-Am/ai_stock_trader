@@ -3,10 +3,10 @@ import os
 
 
 class FakeStockPortfolio:
-    def __init__(self, money_available_to_trade: float, finnhub_api_key: str):
+    def __init__(self, money_available_to_trade: float, finnhub_client: finnhub.Client):
         self.money_available_to_trade = money_available_to_trade
         self.holdings: dict[str, float] = {}
-        self.finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+        self.finnhub_client = finnhub_client
 
     def get_current_price(self, ticker: str) -> float:
         res = self.finnhub_client.quote(ticker)["c"]
@@ -76,7 +76,7 @@ def main():
 
     starting_money = float(input("How much money should the account have? "))
 
-    portfolio = FakeStockPortfolio(starting_money, finnhub_api_key)
+    portfolio = FakeStockPortfolio(starting_money, finnhub.Client(finnhub_api_key))
 
     running = True
     while running:

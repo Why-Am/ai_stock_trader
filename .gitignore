@@ -9,6 +9,6 @@ wheels/
 # Virtual environments
 .venv
 
-# Generated file
+# Generated files
 
-last_response.txt
+log
