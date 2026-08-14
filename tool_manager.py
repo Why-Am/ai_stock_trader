@@ -1,4 +1,4 @@
-from typing import Any
+from time import sleep
 
 import finnhub
 import os
@@ -27,6 +27,8 @@ class ToolManager:
                 f"Open price of the day: {quote['o']}\n"
                 f"Previous close price: {quote['pc']}\n\n"
             )
+
+            sleep(0.1)
 
         return res
 
