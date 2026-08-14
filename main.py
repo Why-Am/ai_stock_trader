@@ -35,6 +35,7 @@ def main():
 
     messages = [{"role": "system", "content": prompt}]
 
+    print("Getting response 1...")
     response_1 = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
@@ -53,6 +54,7 @@ def main():
 
     messages.append(response_1)
 
+    print("Running tools...")
     for tool_call in response_1["tool_calls"]:
         tool_name = tool_call["function"]["name"]
         tool_args = json.loads(tool_call["function"]["arguments"])
@@ -66,6 +68,7 @@ def main():
             }
         )
 
+    print("Getting response 2...")
     response_2 = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
