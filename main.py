@@ -30,7 +30,7 @@ def main():
         "The following is the state of your portfolio:\n"
         f"{portfolio.describe()}\n\n"
         "You can only use the `get_stock_quote` tool in your first response, "
-        "so make calls for every stock you want to know about.\n"
+        "so put in the tickers of every stock you want to know about.\n"
         "You will execute the trades in your second response in JSON format.\n"
     )
 
@@ -44,7 +44,6 @@ def main():
             "model": MODEL,
             "tools": tool_manager.tools,
             "messages": messages,
-            # "response_format": json_schema,
         },
     )
 
