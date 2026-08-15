@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from news import get_news
 
 import requests
 from fake_stock_portfolio import FakeStockPortfolio
@@ -25,7 +26,7 @@ def main():
         "You are a stock trading AI that is run every day.\n"
         "Your job is to maximize returns in trading US stocks.\n"
         "The following is the latest market news:\n"
-        f"{finnhub_client.general_news("general")}\n\n"
+        f"{get_news(finnhub_client)}\n\n"
         "The following is the state of your portfolio:\n"
         f"{portfolio.describe()}\n\n"
         "You can only use the `get_stock_quote` tool in your first response, "
