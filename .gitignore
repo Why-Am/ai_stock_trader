@@ -10,5 +10,4 @@ wheels/
 .venv
 
 # Generated files
-
-log
+log/*
