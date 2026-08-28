@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from news import get_news
+from log import log
 
 import requests
 from fake_stock_portfolio import FakeStockPortfolio
@@ -47,8 +48,7 @@ def main():
         },
     )
 
-    with open("log/response_1.txt", "w", encoding="utf-8") as file:
-        file.write(json.dumps(response_1.json(), ensure_ascii=False, indent=2))
+    log("response_1.txt", json.dumps(response_1.json(), ensure_ascii=False, indent=2))
 
     response_1 = response_1.json()["choices"][0]["message"]
 
@@ -81,13 +81,11 @@ def main():
 
     print(response_2.json()["choices"][0]["message"]["content"])
 
-    with open("log/response_2.txt", "w", encoding="utf-8") as file:
-        file.write(json.dumps(response_2.json(), ensure_ascii=False, indent=2))
+    log("response_2.txt", json.dumps(response_2.json(), ensure_ascii=False, indent=2))
 
     messages.append(response_2.json()["choices"][0]["message"])
 
-    with open("log/messages.txt", "w", encoding="utf-8") as file:
-        file.write(json.dumps(messages, indent=2))
+    log("messages.txt", json.dumps(messages, indent=2))
 
 
 if __name__ == "__main__":
