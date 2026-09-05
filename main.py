@@ -50,12 +50,12 @@ def main():
 
     log("response_1.txt", json.dumps(response_1.json(), ensure_ascii=False, indent=2))
 
-    response_1 = response_1.json()["choices"][0]["message"]
+    response_1_message = response_1.json()["choices"][0]["message"]
 
-    messages.append(response_1)
+    messages.append(response_1_message)
 
     print("Running tools...")
-    for tool_call in response_1["tool_calls"]:
+    for tool_call in response_1_message["tool_calls"]:
         tool_name = tool_call["function"]["name"]
         tool_args = json.loads(tool_call["function"]["arguments"])
         tool_response = tool_manager.run_tool(tool_name, tool_args)
@@ -79,11 +79,12 @@ def main():
         },
     )
 
-    print(response_2.json()["choices"][0]["message"]["content"])
+    response_2_message = response_2.json()["choices"][0]["message"]
+    print(response_2_message["content"])
 
     log("response_2.txt", json.dumps(response_2.json(), ensure_ascii=False, indent=2))
 
-    messages.append(response_2.json()["choices"][0]["message"])
+    messages.append(response_2_message)
 
     log("messages.txt", json.dumps(messages, indent=2))
 
