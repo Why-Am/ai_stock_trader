@@ -96,10 +96,7 @@ class AI:
         print("Getting response 1...")
 
         response_1 = self.get_response_1()
-        log(
-            "response_1.txt",
-            json.dumps(response_1.json(), ensure_ascii=False, indent=2),
-        )
+        log("response_1.txt", json.dumps(response_1.json(), indent=2))
 
         print("Running tools...")
 
@@ -108,10 +105,7 @@ class AI:
         print("Getting response 2...")
 
         response_2 = self.get_response_2()
-        log(
-            "response_2.txt",
-            json.dumps(response_2.json(), ensure_ascii=False, indent=2),
-        )
+        log("response_2.txt", json.dumps(response_2.json(), indent=2))
 
         log("messages.txt", json.dumps(self.messages, indent=2))
 
