@@ -17,12 +17,11 @@ MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 class AI:
     def __init__(
         self,
-        tool_manager: ToolManager,
         finnhub_client: finnhub.Client,
         portfolio: FakeStockPortfolio,
     ):
         self.api_key = os.getenv("OPENROUTER_API_KEY")
-        self.tool_manager = tool_manager
+        self.tool_manager = ToolManager(finnhub_client)
 
         prompt = self.make_prompt(finnhub_client, portfolio)
         self.messages = [{"role": "system", "content": prompt}]
