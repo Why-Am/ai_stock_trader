@@ -2,11 +2,13 @@ import os
 
 import finnhub
 
+from exceptions import APIKeyNotFoundError
+
 
 def create_finnhub_client() -> finnhub.Client:
     finnhub_api_key = os.getenv("FINNHUB_API_KEY")
     if finnhub_api_key is None:
-        raise Exception(
+        raise APIKeyNotFoundError(
             "Cannot get the FINNHUB_API_KEY environment variable. Make sure it is set."
         )
 
