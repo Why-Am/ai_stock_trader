@@ -4,6 +4,7 @@ import os
 import finnhub
 import requests
 
+from exceptions import APIKeyNotFoundError
 from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import get_news
 from json_schema import json_schema
@@ -21,6 +22,10 @@ class AI:
         portfolio: FakeStockPortfolio,
     ):
         self.api_key = os.getenv("OPENROUTER_API_KEY")
+        if self.api_key is None:
+            raise APIKeyNotFoundError(
+                "Couldn't find OPENROUTER_API_KEY in environment variables. Make sure it is set."
+            )
         self.tool_manager = ToolManager(finnhub_client)
 
         prompt = self.make_prompt(finnhub_client, portfolio)
