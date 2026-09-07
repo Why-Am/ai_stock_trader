@@ -5,6 +5,7 @@ import requests
 import finnhub
 from fake_stock_portfolio import FakeStockPortfolio
 
+from log import log
 from tool_manager import ToolManager
 from json_schema import json_schema
 from finnhub_helper import get_news
@@ -82,3 +83,25 @@ class AI:
             "so put in the tickers of every stock you want to know about.\n"
             "You will execute the trades in your second response in JSON format.\n"
         )
+
+    def get_trades(self) -> dict:
+        print("Getting response 1...")
+
+        response_1 = self.get_response_1()
+        log("response_1.txt", json.dumps(response_1.json(), ensure_ascii=False, indent=2))
+
+        print("Running tools...")
+
+        self.run_tools()
+
+        print("Getting response 2...")
+
+        response_2 = self.get_response_2()
+        log("response_2.txt", json.dumps(response_2.json(), ensure_ascii=False, indent=2))
+        
+        log("messages.txt", json.dumps(self.messages, indent=2))
+
+        response_2_message_content = self.get_response_message_content(response_2)
+        print(f"AI Response:\n{response_2_message_content}")
+
+        return json.loads(response_2_message_content)
