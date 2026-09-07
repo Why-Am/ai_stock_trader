@@ -9,7 +9,8 @@ from tool_manager import ToolManager
 from json_schema import json_schema
 from finnhub_helper import get_news
 
-MODEL = "openrouter/free"
+# MODEL = "openrouter/free"
+MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
 class AI:
     def __init__(self, tool_manager: ToolManager, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio):
