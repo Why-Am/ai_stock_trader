@@ -1,7 +1,7 @@
-from fake_stock_portfolio import FakeStockPortfolio
-from tool_manager import ToolManager
-from finnhub_helper import create_finnhub_client
 from ai import AI
+from fake_stock_portfolio import FakeStockPortfolio
+from finnhub_helper import create_finnhub_client
+from tool_manager import ToolManager
 
 
 def main():

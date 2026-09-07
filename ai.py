@@ -1,21 +1,27 @@
 import json
 import os
-import requests
 
 import finnhub
-from fake_stock_portfolio import FakeStockPortfolio
+import requests
 
+from fake_stock_portfolio import FakeStockPortfolio
+from finnhub_helper import get_news
+from json_schema import json_schema
 from log import log
 from tool_manager import ToolManager
-from json_schema import json_schema
-from finnhub_helper import get_news
 
 # MODEL = "openrouter/free"
 MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
+
 class AI:
-    def __init__(self, tool_manager: ToolManager, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio):
-        self.api_key = os.getenv('OPENROUTER_API_KEY')
+    def __init__(
+        self,
+        tool_manager: ToolManager,
+        finnhub_client: finnhub.Client,
+        portfolio: FakeStockPortfolio,
+    ):
+        self.api_key = os.getenv("OPENROUTER_API_KEY")
         self.tool_manager = tool_manager
 
         prompt = self.make_prompt(finnhub_client, portfolio)
@@ -71,7 +77,9 @@ class AI:
     def get_response_message_content(self, response: requests.Response) -> str:
         return response.json()["choices"][0]["message"]["content"]
 
-    def make_prompt(self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio):
+    def make_prompt(
+        self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio
+    ):
         return (
             "You are a stock trading AI that is run every day.\n"
             "Your job is to maximize returns in trading US stocks.\n"
@@ -88,7 +96,10 @@ class AI:
         print("Getting response 1...")
 
         response_1 = self.get_response_1()
-        log("response_1.txt", json.dumps(response_1.json(), ensure_ascii=False, indent=2))
+        log(
+            "response_1.txt",
+            json.dumps(response_1.json(), ensure_ascii=False, indent=2),
+        )
 
         print("Running tools...")
 
@@ -97,8 +108,11 @@ class AI:
         print("Getting response 2...")
 
         response_2 = self.get_response_2()
-        log("response_2.txt", json.dumps(response_2.json(), ensure_ascii=False, indent=2))
-        
+        log(
+            "response_2.txt",
+            json.dumps(response_2.json(), ensure_ascii=False, indent=2),
+        )
+
         log("messages.txt", json.dumps(self.messages, indent=2))
 
         response_2_message_content = self.get_response_message_content(response_2)

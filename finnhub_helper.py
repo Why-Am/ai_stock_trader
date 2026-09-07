@@ -1,5 +1,7 @@
 import os
+
 import finnhub
+
 
 def create_finnhub_client() -> finnhub.Client:
     finnhub_api_key = os.getenv("FINNHUB_API_KEY")
@@ -9,6 +11,7 @@ def create_finnhub_client() -> finnhub.Client:
         )
 
     return finnhub.Client(finnhub_api_key)
+
 
 def get_news(finnhub_client: finnhub.Client) -> dict:
     news = finnhub_client.general_news("general")
