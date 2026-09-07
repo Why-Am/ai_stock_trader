@@ -12,6 +12,7 @@ from log import log
 from tool_manager import ToolManager
 
 # MODEL = "openrouter/free"
+# This model is powerful, popular, and works well with this program
 MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
 
