@@ -8,7 +8,7 @@ def main():
     portfolio = FakeStockPortfolio(500, finnhub_client)
     ai = AI(finnhub_client, portfolio)
 
-    trades = ai.get_trades()
+    ai.get_and_make_trades()
 
 
 if __name__ == "__main__":

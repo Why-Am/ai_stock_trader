@@ -7,9 +7,8 @@ import requests
 from exceptions import APIKeyNotFoundError
 from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import get_news
-from json_schema import json_schema
 from log import log
-from tool_manager import ToolManager
+from tool_manager import ToolManager, get_stock_quote_tool, make_trades_tool
 
 # MODEL = "openrouter/free"
 # This model is powerful, popular, and works well with this program
@@ -32,26 +31,46 @@ class AI:
         prompt = self.make_prompt(finnhub_client, portfolio)
         self.messages = [{"role": "system", "content": prompt}]
 
-    def get_response_1(self):
+    def get_response_1(self) -> tuple[dict, list[dict]]:
+        """Gets first response and tool calls"""
         response_1 = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
             json={
                 "model": MODEL,
-                "tools": self.tool_manager.tools,
+                "tools": get_stock_quote_tool,
                 "messages": self.messages,
             },
-        )
+        ).json()
 
-        response_1_message = response_1.json()["choices"][0]["message"]
+        response_1_message = response_1["choices"][0]["message"]
         self.messages.append(response_1_message)
 
-        self.response_1_tool_calls = response_1_message["tool_calls"]
+        response_1_tool_calls = response_1_message["tool_calls"]
 
-        return response_1
+        return response_1, response_1_tool_calls
 
-    def run_tools(self):
-        for tool_call in self.response_1_tool_calls:
+    def get_response_2(self) -> tuple[dict, list[dict]]:
+        """Gets second response and tool calls"""
+        response_2 = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={
+                "model": MODEL,
+                "tools": make_trades_tool,
+                "messages": self.messages,
+            },
+        ).json()
+
+        response_2_message = response_2["choices"][0]["message"]
+        self.messages.append(response_2_message)
+
+        response_2_tool_calls = response_2_message["tool_calls"]
+
+        return response_2, response_2_tool_calls
+
+    def run_tools(self, tool_calls: list[dict]):
+        for tool_call in tool_calls:
             tool_name = tool_call["function"]["name"]
             tool_args = json.loads(tool_call["function"]["arguments"])
             tool_response = self.tool_manager.run_tool(tool_name, tool_args)
@@ -64,23 +83,8 @@ class AI:
                 }
             )
 
-    def get_response_2(self):
-        response_2 = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json={
-                "model": MODEL,
-                "messages": self.messages,
-                "response_format": json_schema,
-            },
-        )
-
-        response_2_message = response_2.json()["choices"][0]["message"]
-        self.messages.append(response_2_message)
-        return response_2
-
-    def get_response_message_content(self, response: requests.Response) -> str:
-        return response.json()["choices"][0]["message"]["content"]
+    def get_response_message_content(self, response: dict) -> str:
+        return response["choices"][0]["message"]["content"]
 
     def make_prompt(
         self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio
@@ -94,27 +98,27 @@ class AI:
             f"{portfolio.describe()}\n\n"
             "You can only use the `get_stock_quote` tool in your first response, "
             "so put in the tickers of every stock you want to know about.\n"
-            "You will execute the trades in your second response in JSON format.\n"
+            "You will execute the trades in your second response with the `make_trades` tool.\n"
         )
 
-    def get_trades(self) -> dict:
+    def get_and_make_trades(self) -> None:
         print("Getting response 1...")
-
-        response_1 = self.get_response_1()
-        log("response_1.txt", json.dumps(response_1.json(), indent=2))
+        response_1, response_1_tool_calls = self.get_response_1()
+        log("response_1.txt", json.dumps(response_1, indent=2))
 
         print("Running tools...")
-
-        self.run_tools()
+        self.run_tools(response_1_tool_calls)
 
         print("Getting response 2...")
-
-        response_2 = self.get_response_2()
-        log("response_2.txt", json.dumps(response_2.json(), indent=2))
+        response_2, response_2_tool_calls = self.get_response_2()
+        log("response_2.txt", json.dumps(response_2, indent=2))
 
         log("messages.txt", json.dumps(self.messages, indent=2))
 
         response_2_message_content = self.get_response_message_content(response_2)
         print(f"AI Response:\n{response_2_message_content}")
 
-        return json.loads(response_2_message_content)
+        input("Press enter to confirm trades.")
+
+        print("Making trades...")
+        self.run_tools(response_2_tool_calls)

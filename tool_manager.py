@@ -1,7 +1,11 @@
+import os
 from time import sleep
+from typing import ClassVar
 
 import finnhub
-import os
+
+from exceptions import ToolCallError
+from fake_stock_portfolio import FakeStockPortfolio
 
 
 class ToolManager:
@@ -32,31 +36,86 @@ class ToolManager:
 
         return res
 
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_stock_quote",
-                "description": "Get the quotes of US stocks.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "tickers": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Tickers for the stocks you want to get quotes for.",
-                        }
-                    },
-                    "required": ["tickers"],
-                },
-            },
-        }
-    ]
+    def make_trades(self, portfolio: FakeStockPortfolio, trades: list[dict]):
+        for trade in trades:
+            match trade["action"]:
+                case "buy":
+                    portfolio.buy(trade["ticker"], trade["amount"])
+                case "sell":
+                    portfolio.sell(trade["ticker"], trade["amount"])
+                case _:
+                    raise ToolCallError(
+                        f'trade["action"] should be one of "buy" or "sell", instead got {trade["action"]}'
+                    )
 
-    _tool_mapping = {"get_stock_quote": get_stock_quotes}
+    _tool_mapping: ClassVar[dict] = {
+        "get_stock_quote": get_stock_quotes,
+        "make_trades": make_trades,
+    }
 
     def run_tool(self, tool_name: str, tool_args):
         return self._tool_mapping[tool_name](self, **tool_args)
+
+
+get_stock_quote_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_quote",
+            "description": "Get the quotes of US stocks.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "tickers": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Tickers for the stocks you want to get quotes for.",
+                    }
+                },
+                "required": ["tickers"],
+            },
+        },
+    }
+]
+
+make_trades_tool = [
+    {
+        "type": "function",
+        "function": {
+            "name": "make_trades",
+            "description": "Make stock trades.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "trades": {
+                        "type": "array",
+                        "description": "The trades you want to make.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "ticker": {
+                                    "type": "string",
+                                    "description": "Ticker of the stock you want to trade.",
+                                },
+                                "action": {
+                                    "type": "string",
+                                    "enum": ["buy", "sell"],
+                                    "description": "Type of trade you want to make.",
+                                },
+                                "amount": {
+                                    "type": "number",
+                                    "description": "Amount of shares. Can be fractional.",
+                                },
+                            },
+                            "required": ["ticker", "action", "amount"],
+                        },
+                    }
+                },
+                "required": ["trades"],
+            },
+        },
+    }
+]
 
 
 def main():

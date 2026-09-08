@@ -4,3 +4,7 @@ class APIKeyNotFoundError(Exception):
 
 class StockPortfolioError(Exception):
     """Raised when an error is encountered with the stock portfolio"""
+
+
+class ToolCallError(Exception):
+    """Raised when an error is encountered with tool calls"""
