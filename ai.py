@@ -10,17 +10,15 @@ from finnhub_helper import get_news
 from log import log
 from tool_manager import ToolManager, get_stock_quote_tool, make_trades_tool
 
-# MODEL = "openrouter/free"
-# This model is powerful, popular, and works well with this program
-MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
-
 
 class AI:
     def __init__(
         self,
+        model: str,
         finnhub_client: finnhub.Client,
         portfolio: FakeStockPortfolio,
     ):
+        self.model = model
         self.api_key = os.getenv("OPENROUTER_API_KEY")
         if self.api_key is None:
             raise APIKeyNotFoundError(
@@ -37,7 +35,7 @@ class AI:
             "https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
             json={
-                "model": MODEL,
+                "model": self.model,
                 "tools": get_stock_quote_tool,
                 "messages": self.messages,
             },
@@ -56,7 +54,7 @@ class AI:
             "https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
             json={
-                "model": MODEL,
+                "model": self.model,
                 "tools": make_trades_tool,
                 "messages": self.messages,
             },
