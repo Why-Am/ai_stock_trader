@@ -88,7 +88,7 @@ class AI:
         self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio
     ):
         return (
-            "You are a stock trading AI that is run every day.\n"
+            "You are a stock trading AI that is run daily.\n"
             "Your job is to maximize returns in trading US stocks.\n"
             "The following is the latest market news:\n"
             f"{get_news(finnhub_client)}\n\n"
@@ -97,6 +97,7 @@ class AI:
             "You can only use the `get_stock_quote` tool in your first response, "
             "so put in the tickers of every stock you want to know about.\n"
             "You will execute the trades in your second response with the `make_trades` tool.\n"
+            "Explain your trades."
         )
 
     def get_and_make_trades(self) -> None:
