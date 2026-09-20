@@ -6,10 +6,19 @@ from exceptions import APIKeyNotFoundError, StockPortfolioError
 
 
 class FakeStockPortfolio:
-    def __init__(self, money_available_to_trade: float, finnhub_client: finnhub.Client):
+    def __init__(
+        self,
+        money_available_to_trade: float,
+        finnhub_client: finnhub.Client,
+        holdings: dict[str, float] | None = None,
+    ):
         self.money_available_to_trade = money_available_to_trade
-        self.holdings: dict[str, float] = {}
         self.finnhub_client = finnhub_client
+
+        if holdings is not None:
+            self.holdings = holdings
+        else:
+            self.holdings: dict[str, float] = {}
 
     def get_current_price(self, ticker: str) -> float:
         res = self.finnhub_client.quote(ticker)["c"]

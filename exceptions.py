@@ -8,3 +8,7 @@ class StockPortfolioError(Exception):
 
 class ToolCallError(Exception):
     """Raised when an error is encountered with tool calls"""
+
+
+class EmptySaveError(Exception):
+    """Raised when the program tries to load an empty save"""
