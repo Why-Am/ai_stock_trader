@@ -1,0 +1,2 @@
+SAVE_FILE_PATH = "data/save.csv"
+STARTING_MONEY = 500

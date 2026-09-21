@@ -1,8 +1,10 @@
 import os
+from time import sleep
 
 import finnhub
 
 from exceptions import APIKeyNotFoundError, StockPortfolioError
+from portfolio_data import PortfolioData
 
 
 class FakeStockPortfolio:
@@ -33,6 +35,22 @@ class FakeStockPortfolio:
             f"Current holdings: {self.holdings}"
         )
 
+    def get_data(self) -> PortfolioData:
+        return PortfolioData(
+            self.holdings, self.get_total_value(), self.money_available_to_trade
+        )
+
+    def get_total_value(self) -> float:
+        """Gets total value of the portfolio"""
+        total = self.money_available_to_trade
+
+        for ticker, amount in self.holdings.items():
+            price = self.get_current_price(ticker)
+            total += amount * price
+            sleep(0.1)
+
+        return total
+
     def buy(self, ticker: str, amount: float):
         if amount <= 0:
             raise StockPortfolioError("Cannot buy zero or negative stock")
@@ -41,7 +59,7 @@ class FakeStockPortfolio:
 
         transaction_total = current_price * amount
         if transaction_total > self.money_available_to_trade:
-            raise StockPortfolioError("Insufficient funds.")
+            raise StockPortfolioError("Insufficient funds.")  # TODO: Allow some leeway
 
         if ticker in self.holdings:
             self.holdings[ticker] += amount

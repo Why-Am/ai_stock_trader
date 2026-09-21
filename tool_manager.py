@@ -9,8 +9,9 @@ from fake_stock_portfolio import FakeStockPortfolio
 
 
 class ToolManager:
-    def __init__(self, finnhub_client: finnhub.Client):
+    def __init__(self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio):
         self.finnhub_client = finnhub_client
+        self.portfolio = portfolio
 
     def get_stock_quotes(self, tickers: list[str]) -> str:
         res = ""
@@ -36,17 +37,20 @@ class ToolManager:
 
         return res
 
-    def make_trades(self, portfolio: FakeStockPortfolio, trades: list[dict]):
+    def make_trades(self, trades: list[dict], explanation: str) -> str:
+        """Performs trades and returns the explanation"""
         for trade in trades:
             match trade["action"]:
                 case "buy":
-                    portfolio.buy(trade["ticker"], trade["amount"])
+                    self.portfolio.buy(trade["ticker"], trade["amount"])
                 case "sell":
-                    portfolio.sell(trade["ticker"], trade["amount"])
+                    self.portfolio.sell(trade["ticker"], trade["amount"])
                 case _:
                     raise ToolCallError(
                         f'trade["action"] should be one of "buy" or "sell", instead got {trade["action"]}'
                     )
+
+        return explanation
 
     _tool_mapping: ClassVar[dict] = {
         "get_stock_quote": get_stock_quotes,
@@ -109,9 +113,13 @@ make_trades_tool = [
                             },
                             "required": ["ticker", "action", "amount"],
                         },
-                    }
+                    },
+                    "explanation": {
+                        "type": "str",
+                        "description": "An explanation of the reasoning behind the trades.",
+                    },
                 },
-                "required": ["trades"],
+                "required": ["trades", "explanation"],
             },
         },
     }
@@ -121,7 +129,8 @@ make_trades_tool = [
 def main():
     api_key = os.getenv("FINNHUB_API_KEY")
     finnhub_client = finnhub.Client(api_key)
-    tool_manager = ToolManager(finnhub_client)
+    portfolio = FakeStockPortfolio(500, finnhub_client)
+    tool_manager = ToolManager(finnhub_client, portfolio)
     # print(tool_manager.get_stock_quote("AAPL"))
 
     print(tool_manager.run_tool("get_stock_quote", {"ticker": "NVDA"}))

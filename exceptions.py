@@ -12,3 +12,7 @@ class ToolCallError(Exception):
 
 class EmptySaveError(Exception):
     """Raised when the program tries to load an empty save"""
+
+
+class SaveCancelError(Exception):
+    """Raised when a save is cancelled"""

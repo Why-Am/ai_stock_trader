@@ -4,9 +4,10 @@ from pathlib import Path
 
 import finnhub
 
-from exceptions import EmptySaveError
+from exceptions import EmptySaveError, SaveCancelError
 from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import create_finnhub_client
+from portfolio_data import PortfolioData
 
 TIME = "Time"
 PORTFOLIO_BEFORE_HOLDINGS = "Portfolio before - holdings"
@@ -41,33 +42,39 @@ class Historian:
 
     def save(
         self,
-        time: str,
-        portfolio_before_holdings: dict[str, float],
-        portfolio_before_total_value: float,
-        portfolio_before_money_left_to_trade: float,
-        trades: str,
-        portfolio_after_holdings: dict[str, float],
-        portfolio_after_total_value: float,
-        portfolio_after_money_left_to_trade: float,
+        time: int,
+        portfolio_before: PortfolioData,
+        trades: list[dict],
+        portfolio_after: PortfolioData,
         explanation: str,
-        all_messages: str,
+        all_messages: list[dict],
+        initialize: bool = False,
     ):
         with open(self.path_to_save, "a", encoding="utf-8", newline="") as file:
             writer = csv.DictWriter(file, FIELDNAMES)
-            row = {
-                FIELDNAMES[0]: time,
-                FIELDNAMES[1]: json.dumps(portfolio_before_holdings),
-                FIELDNAMES[2]: portfolio_before_total_value,
-                FIELDNAMES[3]: portfolio_before_money_left_to_trade,
-                FIELDNAMES[4]: trades,
-                FIELDNAMES[5]: json.dumps(portfolio_after_holdings),
-                FIELDNAMES[6]: portfolio_after_total_value,
-                FIELDNAMES[7]: portfolio_after_money_left_to_trade,
+            row: dict[str, str] = {
+                FIELDNAMES[0]: str(time),
+                FIELDNAMES[1]: json.dumps(portfolio_before.holdings),
+                FIELDNAMES[2]: str(portfolio_before.total_value),
+                FIELDNAMES[3]: str(portfolio_before.money_available_to_trade),
+                FIELDNAMES[4]: json.dumps(trades),
+                FIELDNAMES[5]: json.dumps(portfolio_after.holdings),
+                FIELDNAMES[6]: str(portfolio_after.total_value),
+                FIELDNAMES[7]: str(portfolio_after.money_available_to_trade),
                 FIELDNAMES[8]: explanation,
-                FIELDNAMES[9]: all_messages,
+                FIELDNAMES[9]: json.dumps(all_messages),
             }
 
-            if self.save_is_empty():
+            if initialize:
+                if not self.save_is_empty():
+                    answer = input(
+                        f"Existing contents of {self.path_to_save} will be overwritten. Continue (y/n)?: "
+                    )
+                    if answer in ["Y", "y"]:
+                        open(self.path_to_save, "w").close()
+                    else:
+                        raise SaveCancelError
+
                 writer.writeheader()
 
             writer.writerow(row)  # type: ignore
@@ -95,16 +102,12 @@ class Historian:
 def main():
     historian = Historian("data/save.csv")
     historian.save(
-        time="asdf",
-        portfolio_before_holdings={"TSLA": 1, "AAPL": 2},
-        portfolio_before_total_value=123,
-        portfolio_before_money_left_to_trade=908,
-        trades="lkajdsflj",
-        portfolio_after_holdings={"TSLA": 0.5, "NVDA": 100},
-        portfolio_after_total_value=4807,
-        portfolio_after_money_left_to_trade=879,
-        explanation="fjlfljkfjk",
-        all_messages="foiudsoiu",
+        time=0,
+        portfolio_before=PortfolioData({"TSLA": 3, "AAPL": 2}, 333, 8.2),
+        trades=[{"ticker": "SPX", "action": "buy", "amount": 1}],
+        portfolio_after=PortfolioData({"RTX": 0.1, "AAPL": 3, "NVDA": 300}, 1000, 0),
+        explanation="this is the explanation",
+        all_messages=[{"message": "this is a message"}],
     )
     finnhub_client = create_finnhub_client()
     portfolio = historian.load_portfolio(finnhub_client)

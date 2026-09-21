@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass
 
 import finnhub
 import requests
@@ -9,6 +10,13 @@ from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import get_news
 from log import log
 from tool_manager import ToolManager, get_stock_quote_tool, make_trades_tool
+
+
+@dataclass
+class RunData:
+    explanation: str
+    trades: list[dict]
+    all_messages: list[dict]
 
 
 class AI:
@@ -24,12 +32,12 @@ class AI:
             raise APIKeyNotFoundError(
                 "Couldn't find OPENROUTER_API_KEY in environment variables. Make sure it is set."
             )
-        self.tool_manager = ToolManager(finnhub_client)
+        self.tool_manager = ToolManager(finnhub_client, portfolio)
 
-        prompt = self.make_prompt(finnhub_client, portfolio)
+        prompt = self._make_prompt(finnhub_client, portfolio)
         self.messages = [{"role": "system", "content": prompt}]
 
-    def get_response_1(self) -> tuple[dict, list[dict]]:
+    def _get_response_1(self) -> tuple[dict, list[dict]]:
         """Gets first response and tool calls"""
         response_1 = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -48,7 +56,7 @@ class AI:
 
         return response_1, response_1_tool_calls
 
-    def get_response_2(self) -> tuple[dict, list[dict]]:
+    def _get_response_2(self) -> tuple[dict, list[dict]]:
         """Gets second response and tool calls"""
         response_2 = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -67,11 +75,14 @@ class AI:
 
         return response_2, response_2_tool_calls
 
-    def run_tools(self, tool_calls: list[dict]):
+    def _run_tools(self, tool_calls: list[dict]) -> list:
+        tool_responses = []
+
         for tool_call in tool_calls:
             tool_name = tool_call["function"]["name"]
             tool_args = json.loads(tool_call["function"]["arguments"])
             tool_response = self.tool_manager.run_tool(tool_name, tool_args)
+            tool_responses.append(tool_response)
 
             self.messages.append(
                 {
@@ -81,10 +92,12 @@ class AI:
                 }
             )
 
-    def get_response_message_content(self, response: dict) -> str:
+        return tool_responses
+
+    def _get_response_message_content(self, response: dict) -> str:
         return response["choices"][0]["message"]["content"]
 
-    def make_prompt(
+    def _make_prompt(
         self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio
     ):
         return (
@@ -100,24 +113,31 @@ class AI:
             "Explain your trades."
         )
 
-    def get_and_make_trades(self) -> None:
+    def get_and_make_trades(self) -> RunData:
         print("Getting response 1...")
-        response_1, response_1_tool_calls = self.get_response_1()
+        response_1, response_1_tool_calls = self._get_response_1()
         log("response_1.txt", json.dumps(response_1, indent=2))
 
         print("Running tools...")
-        self.run_tools(response_1_tool_calls)
+        self._run_tools(response_1_tool_calls)
 
         print("Getting response 2...")
-        response_2, response_2_tool_calls = self.get_response_2()
+        response_2, response_2_tool_calls = self._get_response_2()
         log("response_2.txt", json.dumps(response_2, indent=2))
 
         log("messages.txt", json.dumps(self.messages, indent=2))
 
-        response_2_message_content = self.get_response_message_content(response_2)
+        response_2_message_content = self._get_response_message_content(response_2)
         print(f"AI Response:\n{response_2_message_content}")
 
         input("Press enter to confirm trades.")
 
         print("Making trades...")
-        self.run_tools(response_2_tool_calls)
+        explanation = self._run_tools(response_2_tool_calls)[0]
+
+        trades = json.loads(response_2_tool_calls[0]["function"]["arguments"]["trades"])
+
+        print(f"Trades: {json.dumps(trades, indent=2)}")
+        print(f"explanation: {explanation}")
+
+        return RunData(explanation, trades, self.messages)
