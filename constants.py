@@ -1,2 +1,3 @@
 SAVE_FILE_PATH = "data/save.csv"
 STARTING_MONEY = 500
+MAXIMUM_TRIES = 2

@@ -2,8 +2,8 @@ import sys
 import time
 
 from ai import AI
-from constants import SAVE_FILE_PATH
-from exceptions import EmptySaveError
+from constants import MAXIMUM_TRIES, SAVE_FILE_PATH
+from exceptions import EmptySaveError, StockPortfolioError
 from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import create_finnhub_client
 from historian import Historian
@@ -34,7 +34,17 @@ def main():
 
     ai = AI(MODEL, finnhub_client, portfolio)
 
-    run_data = ai.get_and_make_trades()
+    try_count = 1
+    while True:
+        try:
+            run_data = ai.get_and_make_trades()
+            break
+        except StockPortfolioError as e:
+            print(f"try {try_count}/{MAXIMUM_TRIES} failed: {e}")
+            try_count += 1
+            if try_count > MAXIMUM_TRIES:
+                print("Exiting.")
+                sys.exit(1)
 
     historian.save(
         time=int(time.time()),
