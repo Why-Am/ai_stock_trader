@@ -59,7 +59,9 @@ class FakeStockPortfolio:
 
         transaction_total = current_price * amount
         if transaction_total > self.money_available_to_trade:
-            raise StockPortfolioError("Insufficient funds.")  # TODO: Allow some leeway
+            # raise StockPortfolioError("Insufficient funds.")
+            amount = self.money_available_to_trade / current_price
+            transaction_total = self.money_available_to_trade
 
         if ticker in self.holdings:
             self.holdings[ticker] += amount
@@ -76,9 +78,11 @@ class FakeStockPortfolio:
             raise StockPortfolioError(f"There is no holding for `{ticker}`.")
 
         if amount > self.holdings[ticker]:
-            raise StockPortfolioError(
-                f"Unable to sell more stock than is held ({amount} > {self.holdings[ticker]})."
-            )
+            # raise StockPortfolioError(
+            #     f"Unable to sell more stock than is held ({amount} > {self.holdings[ticker]})."
+            # )
+            self.sell_all(ticker)
+            return
 
         if amount == self.holdings[ticker]:
             self.sell_all(ticker)
