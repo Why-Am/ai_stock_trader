@@ -61,7 +61,7 @@ class Historian:
                 FIELDNAMES[5]: json.dumps(portfolio_after.holdings),
                 FIELDNAMES[6]: str(portfolio_after.total_value),
                 FIELDNAMES[7]: str(portfolio_after.money_available_to_trade),
-                FIELDNAMES[8]: explanation,
+                FIELDNAMES[8]: json.dumps(explanation),
                 FIELDNAMES[9]: json.dumps(all_messages),
             }
 
