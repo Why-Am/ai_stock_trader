@@ -135,7 +135,8 @@ class AI:
         print("Making trades...")
         explanation = self._run_tools(response_2_tool_calls)[0]
 
-        trades = json.loads(response_2_tool_calls[0]["function"]["arguments"]["trades"])
+        arguments = response_2_tool_calls[0]["function"]["arguments"]
+        trades = json.loads(arguments)["trades"]
 
         print(f"Trades: {json.dumps(trades, indent=2)}")
         print(f"explanation: {explanation}")
