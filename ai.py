@@ -127,9 +127,6 @@ class AI:
 
         log("messages.txt", json.dumps(self.messages, indent=2))
 
-        response_2_message_content = self._get_response_message_content(response_2)
-        print(f"AI Response:\n{response_2_message_content}")
-
         input("Press enter to confirm trades.")
 
         print("Making trades...")
