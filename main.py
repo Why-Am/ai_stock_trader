@@ -47,12 +47,12 @@ def main():
                 sys.exit(1)
 
     historian.save(
-        time=int(time.time()),
-        portfolio_before=portfolio_before,
-        trades=run_data.trades,
-        portfolio_after=portfolio.get_data(),
-        explanation=run_data.explanation,
-        all_messages=run_data.all_messages,
+        time                = int(time.time()),
+        portfolio_before    = portfolio_before,
+        trades              = run_data.trades,
+        portfolio_after     = portfolio.get_data(),
+        explanation         = run_data.explanation,
+        all_messages        = run_data.all_messages,
     )
 
 

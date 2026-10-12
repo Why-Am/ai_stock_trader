@@ -9,16 +9,16 @@ from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import create_finnhub_client
 from portfolio_data import PortfolioData
 
-TIME = "Time"
-PORTFOLIO_BEFORE_HOLDINGS = "Portfolio before - holdings"
-PORTFOLIO_BEFORE_MONEY_LEFT_TO_TRADE = "Portfolio before - money left to trade"
-PORTFOLIO_BEFORE_TOTAL_VALUE = "Portfolio before - total value"
-TRADES = "Trades"
-PORTFOLIO_AFTER_HOLDINGS = "Portfolio after - holdings"
-PORTFOLIO_AFTER_MONEY_LEFT_TO_TRADE = "Portfolio after - money left to trade"
-PORTFOLIO_AFTER_TOTAL_VALUE = "Portfolio after - total value"
-EXPLANATION = "Explanation"
-ALL_MESSAGES = "All messages"
+TIME                                    = "Time"
+PORTFOLIO_BEFORE_HOLDINGS               = "Portfolio before - holdings"
+PORTFOLIO_BEFORE_MONEY_LEFT_TO_TRADE    = "Portfolio before - money left to trade"
+PORTFOLIO_BEFORE_TOTAL_VALUE            = "Portfolio before - total value"
+TRADES                                  = "Trades"
+PORTFOLIO_AFTER_HOLDINGS                = "Portfolio after - holdings"
+PORTFOLIO_AFTER_MONEY_LEFT_TO_TRADE     = "Portfolio after - money left to trade"
+PORTFOLIO_AFTER_TOTAL_VALUE             = "Portfolio after - total value"
+EXPLANATION                             = "Explanation"
+ALL_MESSAGES                            = "All messages"
 
 FIELDNAMES = (
     TIME,
@@ -42,13 +42,13 @@ class Historian:
 
     def save(
         self,
-        time: int,
+        time            : int,
         portfolio_before: PortfolioData,
-        trades: list[dict],
-        portfolio_after: PortfolioData,
-        explanation: str,
-        all_messages: list[dict],
-        initialize: bool = False,
+        trades          : list[dict],
+        portfolio_after : PortfolioData,
+        explanation     : str,
+        all_messages    : list[dict],
+        initialize      : bool = False,
     ):
         with open(self.path_to_save, "a", encoding="utf-8", newline="") as file:
             writer = csv.DictWriter(file, FIELDNAMES)
@@ -102,12 +102,12 @@ class Historian:
 def main():
     historian = Historian("data/save.csv")
     historian.save(
-        time=0,
-        portfolio_before=PortfolioData({"TSLA": 3, "AAPL": 2}, 333, 8.2),
-        trades=[{"ticker": "SPX", "action": "buy", "amount": 1}],
-        portfolio_after=PortfolioData({"RTX": 0.1, "AAPL": 3, "NVDA": 300}, 1000, 0),
-        explanation="this is the explanation",
-        all_messages=[{"message": "this is a message"}],
+        time                = 0,
+        portfolio_before    = PortfolioData({"TSLA": 3, "AAPL": 2}, 333, 8.2),
+        trades              = [{"ticker": "SPX", "action": "buy", "amount": 1}],
+        portfolio_after     = PortfolioData({"RTX": 0.1, "AAPL": 3, "NVDA": 300}, 1000, 0),
+        explanation         = "this is the explanation",
+        all_messages        = [{"message": "this is a message"}],
     )
     finnhub_client = create_finnhub_client()
     portfolio = historian.load_portfolio(finnhub_client)
