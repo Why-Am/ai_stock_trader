@@ -16,3 +16,7 @@ class EmptySaveError(Exception):
 
 class SaveCancelError(Exception):
     """Raised when a save is cancelled"""
+
+
+class AIRunError(Exception):
+    """Raised when there is a problem with the AI run"""

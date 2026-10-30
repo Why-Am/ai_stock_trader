@@ -1,5 +1,6 @@
 import csv
 import json
+import time
 from pathlib import Path
 
 import finnhub
@@ -42,12 +43,12 @@ class Historian:
 
     def save(
         self,
-        time            : int,
         portfolio_before: PortfolioData,
         trades          : list[dict],
         portfolio_after : PortfolioData,
         explanation     : str,
         all_messages    : list[dict],
+        time            : int = int(time.time()),
         initialize      : bool = False,
     ):
         with open(self.path_to_save, "a", encoding="utf-8", newline="") as file:
