@@ -1,9 +1,10 @@
 from sys import argv, exit
 
-from constants import AI_SAVE_FILE_PATH
+from constants import AI_SAVE_FILE_PATH, CONTROL_SAVE_FILE_PATH
 from exceptions import AIRunError, EmptySaveError
 from finnhub_helper import create_finnhub_client
 from run_ai import run_ai
+from run_control import run_control
 
 USAGE = "Usage: run_experiment.py [--initialize]"
 
@@ -34,3 +35,9 @@ except EmptySaveError:
     exit(1)
 
 print("Running Control (S&P 500)...")
+try:
+    run_control(initialize, CONTROL_SAVE_FILE_PATH, finnhub_client)
+except EmptySaveError as e:
+    print(f"Encountered an error while running control: {e}")
+    print("Exiting.")
+    exit(1)
