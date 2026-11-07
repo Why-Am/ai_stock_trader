@@ -127,8 +127,6 @@ class AI:
 
         log("messages.txt", json.dumps(self.messages, indent=2))
 
-        input("Press enter to confirm trades.")
-
         print("Making trades...")
         explanation = self._run_tools(response_2_tool_calls)[0]
 
