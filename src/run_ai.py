@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import finnhub
 
 from ai import AI
@@ -12,7 +14,7 @@ MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 # MODEL = "openrouter/free"
 
 
-def run_ai(initialize: bool, save_file_path: str, finnhub_client: finnhub.Client):
+def run_ai(initialize: bool, save_file_path: Path, finnhub_client: finnhub.Client):
     historian = Historian(save_file_path)
     if initialize:
         portfolio = FakeStockPortfolio(STARTING_MONEY, finnhub_client)

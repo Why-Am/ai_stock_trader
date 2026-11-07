@@ -5,6 +5,7 @@ from pathlib import Path
 
 import finnhub
 
+from constants import TEST_AI_SAVE_FILE_PATH
 from exceptions import EmptySaveError, SaveCancelError
 from fake_stock_portfolio import FakeStockPortfolio
 from finnhub_helper import create_finnhub_client
@@ -36,8 +37,8 @@ FIELDNAMES = (
 
 
 class Historian:
-    def __init__(self, path_to_save: str):
-        self.path_to_save = Path(path_to_save)
+    def __init__(self, path_to_save: Path):
+        self.path_to_save = path_to_save
         if not self.path_to_save.exists():
             self.path_to_save.touch()
 
@@ -101,7 +102,7 @@ class Historian:
 
 
 def main():
-    historian = Historian("data/save.csv")
+    historian = Historian(TEST_AI_SAVE_FILE_PATH)
     historian.save(
         time                = 0,
         portfolio_before    = PortfolioData({"TSLA": 3, "AAPL": 2}, 333, 8.2),

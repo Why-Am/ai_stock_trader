@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import finnhub
 
 from constants import S_AND_P_500_TICKER, STARTING_MONEY
@@ -5,7 +7,7 @@ from fake_stock_portfolio import FakeStockPortfolio
 from historian import Historian
 
 
-def run_control(initialize: bool, save_file_path: str, finnhub_client: finnhub.Client):
+def run_control(initialize: bool, save_file_path: Path, finnhub_client: finnhub.Client):
     historian = Historian(save_file_path)
     if initialize:
         portfolio = FakeStockPortfolio(STARTING_MONEY, finnhub_client)
