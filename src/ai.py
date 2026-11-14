@@ -101,7 +101,7 @@ class AI:
         self, finnhub_client: finnhub.Client, portfolio: FakeStockPortfolio
     ):
         return (
-            "You are a stock trading AI that is run daily.\n"
+            "You are a stock trading AI that is run weekly.\n"
             "Your job is to maximize returns in trading US stocks.\n"
             "The following is the latest market news:\n"
             f"{get_news(finnhub_client)}\n\n"
