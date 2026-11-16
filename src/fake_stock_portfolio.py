@@ -37,7 +37,9 @@ class FakeStockPortfolio:
 
     def get_data(self) -> PortfolioData:
         return PortfolioData(
-            self.holdings.copy(), self.get_total_value(), self.money_available_to_trade
+            holdings=self.holdings.copy(),
+            total_value=self.get_total_value(),
+            money_available_to_trade=self.money_available_to_trade,
         )
 
     def get_total_value(self) -> float:
