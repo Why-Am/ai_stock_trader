@@ -41,7 +41,7 @@ The exact module names may change during implementation, but the boundaries shou
 
 ## Phased implementation
 
-### 1. Establish domain rules and typed data models
+### ~~1. Establish domain rules and typed data models~~ (Done)
 
 - Define validated types for experiment names, dates, portfolio types, tickers, money, holdings, portfolio state, trades, and AI trade explanations.
 - Represent dates as calendar dates and use a single Eastern-Time clock helper for “today”; do not derive business-day behavior from the machine’s local timezone.
