@@ -53,16 +53,17 @@ Then it checks if the stock market is open. If it isn't, it ends the run there.
 Then it checks if any experiments are starting (start date <= current date). If so, then it initializes any control portfolios within those experiments by spending all their available money on their specified stocks.
 
 Finally, for each portfolio:
-	1. If it is an AI-managed portfolio:
-		1. Before making trades, record the date and the portfolio's state in `[portfolio name]_state.csv`
-		2. Give it the prompt alongside the market news
-        3. AI requests stock quotes via tool calls
-		3. Receive its trades and its summarized explanation
-		4. Execute the trades
-			1. If they fail, tell the AI to try again. If it still fails after three tries, the CI run should report failure.
-		5. Record the date, trades, and explanation in `[portfolio name]_trades.csv`
-	2. If it is a control portfolio:
-		1. Record the date and the portfolio's state in `[portfolio name]_state.csv`
+
+1. If it is an AI-managed portfolio:
+    1. Before making trades, record the date and the portfolio's state in `[portfolio name]_state.csv`
+    2. Give it the prompt alongside the market news
+    3. AI requests stock quotes via tool calls
+    4. Receive its trades and its summarized explanation
+    5. Execute the trades
+        1. If they fail, tell the AI to try again. If it still fails after three tries, the CI run should report failure.
+    6. Record the date, trades, and explanation in `[portfolio name]_trades.csv`
+2. If it is a control portfolio:
+    1. Record the date and the portfolio's state in `[portfolio name]_state.csv`
 
 Daily runs should be idempotent.
 
