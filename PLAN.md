@@ -49,7 +49,7 @@ The exact module names may change during implementation, but the boundaries shou
 - Decide and document the precision/serialization policy for money, share quantities, and prices. Decimal arithmetic is preferred over binary floating point for balances and quantities.
 - Define domain errors with enough context to make CI failures actionable.
 
-### 2. Implement safe experiment storage
+### ~~2. Implement safe experiment storage~~ (Done)
 
 - Discover experiments only in `experiments/active` and `experiments/finished`.
 - Load each experiment from its `[experiment name].json` file and validate that its directory contents match the declared portfolios.
