@@ -7,12 +7,12 @@ prevents binary floating-point rounding from changing a portfolio balance.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from enum import Enum
 import re
-from typing import Mapping
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from datetime import UTC, date, datetime
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from enum import StrEnum
 from zoneinfo import ZoneInfo
 
 from .errors import DomainValidationError
@@ -73,12 +73,12 @@ class Ticker:
         return self.value
 
 
-class PortfolioType(str, Enum):
+class PortfolioType(StrEnum):
     AI_MANAGED = "ai-managed"
     CONTROL = "control"
 
 
-class Action(str, Enum):
+class Action(StrEnum):
     BUY = "buy"
     SELL = "sell"
 
@@ -92,7 +92,7 @@ def _name(value: str, label: str) -> str:
 
 def today_et(now: datetime | None = None) -> date:
     """Return the calendar date in Eastern Time, independent of machine TZ."""
-    current = now or datetime.now(timezone.utc)
+    current = now or datetime.now(UTC)
     if current.tzinfo is None:
         raise DomainValidationError("now must be timezone-aware")
     return current.astimezone(ET).date()
@@ -126,7 +126,11 @@ class PortfolioConfig:
                 raise DomainValidationError("AI-managed portfolio cannot have a control ticker")
 
     def to_dict(self) -> dict[str, str]:
-        result = {"name": self.name, "type": self.portfolio_type.value, "starting_cash": f"{self.starting_cash:.2f}"}
+        result = {
+            "name": self.name,
+            "type": self.portfolio_type.value,
+            "starting_cash": f"{self.starting_cash:.2f}",
+        }
         if self.strategy is not None:
             result["strategy"] = self.strategy
         if self.control_ticker is not None:
@@ -154,7 +158,12 @@ class Experiment:
             raise DomainValidationError("portfolio names must be unique")
 
     def to_dict(self) -> dict[str, object]:
-        return {"name": self.name, "start_date": self.start_date.isoformat(), "end_date": self.end_date.isoformat(), "portfolios": [p.to_dict() for p in self.portfolios]}
+        return {
+            "name": self.name,
+            "start_date": self.start_date.isoformat(),
+            "end_date": self.end_date.isoformat(),
+            "portfolios": [p.to_dict() for p in self.portfolios],
+        }
 
 
 @dataclass(frozen=True)
@@ -174,7 +183,11 @@ class Trade:
             raise DomainValidationError("trade quantity must be positive")
 
     def to_dict(self) -> dict[str, str]:
-        return {"action": self.action.value, "ticker": str(self.ticker), "quantity": f"{self.quantity:.6f}"}
+        return {
+            "action": self.action.value,
+            "ticker": str(self.ticker),
+            "quantity": f"{self.quantity:.6f}",
+        }
 
 
 @dataclass(frozen=True)
@@ -198,7 +211,10 @@ class AIDecision:
     explanation: AITradeExplanation
 
     def to_dict(self) -> dict[str, object]:
-        return {"trades": [trade.to_dict() for trade in self.trades], "explanation": self.explanation.summary}
+        return {
+            "trades": [trade.to_dict() for trade in self.trades],
+            "explanation": self.explanation.summary,
+        }
 
 
 @dataclass(frozen=True)
@@ -210,17 +226,27 @@ class PortfolioState:
 
     def __post_init__(self) -> None:
         cash = Money(self.cash)
-        holdings = {Ticker(str(ticker)): Shares(quantity) for ticker, quantity in self.holdings.items()}
-        prices = None if self.prices is None else {Ticker(str(ticker)): Price(price) for ticker, price in self.prices.items()}
+        holdings = {
+            Ticker(str(ticker)): Shares(quantity) for ticker, quantity in self.holdings.items()
+        }
+        prices = (
+            None
+            if self.prices is None
+            else {Ticker(str(ticker)): Price(price) for ticker, price in self.prices.items()}
+        )
         object.__setattr__(self, "cash", cash)
         object.__setattr__(self, "holdings", holdings)
         object.__setattr__(self, "prices", prices)
         if prices is not None:
             if set(holdings) - set(prices):
                 raise DomainValidationError("a current price is required for every holding")
-            calculated = Money(cash + sum((holdings[ticker] * prices[ticker] for ticker in holdings), Decimal("0")))
+            calculated = Money(
+                cash + sum((holdings[ticker] * prices[ticker] for ticker in holdings), Decimal("0"))
+            )
             if self.total_value is not None and Money(self.total_value) != calculated:
-                raise DomainValidationError(f"total value must equal cash plus holdings value ({calculated})")
+                raise DomainValidationError(
+                    f"total value must equal cash plus holdings value ({calculated})"
+                )
             object.__setattr__(self, "total_value", calculated)
         elif self.total_value is not None:
             object.__setattr__(self, "total_value", Money(self.total_value))
@@ -228,4 +254,8 @@ class PortfolioState:
     def to_dict(self) -> dict[str, object]:
         if self.total_value is None:
             raise DomainValidationError("total value is required for serialization")
-        return {"cash": f"{self.cash:.2f}", "holdings": {str(t): f"{q:.6f}" for t, q in sorted(self.holdings.items())}, "total_value": f"{self.total_value:.2f}"}
+        return {
+            "cash": f"{self.cash:.2f}",
+            "holdings": {str(t): f"{q:.6f}" for t, q in sorted(self.holdings.items())},
+            "total_value": f"{self.total_value:.2f}",
+        }

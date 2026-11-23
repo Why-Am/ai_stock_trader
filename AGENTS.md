@@ -3,6 +3,21 @@
 ## Commands
 
 - Run tests: `uv run pytest`
+- Run tests with coverage: `uv run pytest --cov`
+- Check lint: `uv run ruff check .`
+- Check formatting: `uv run ruff format --check .`
+- Apply lint fixes: `uv run ruff check . --fix`
+- Apply formatting: `uv run ruff format .`
+- Run type checking: `uv run pyright`
+
+Before submitting changes, run:
+
+```text
+uv run ruff check .
+uv run ruff format --check .
+uv run pyright
+uv run pytest --cov
+```
 
 ## Project Specification
 

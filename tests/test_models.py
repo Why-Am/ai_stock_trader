@@ -3,7 +3,6 @@ from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 import pytest
-
 from ai_stock_trader.errors import DomainValidationError
 from ai_stock_trader.models import (
     Action,
@@ -49,7 +48,7 @@ def test_state_rejects_total_value_that_does_not_match_prices() -> None:
 @pytest.mark.parametrize(
     ("factory", "value"),
     [
-        (Ticker, "AAPL!") ,
+        (Ticker, "AAPL!"),
         (Shares, "-1"),
         (Price, "0"),
         (PortfolioConfig, ""),
@@ -58,7 +57,12 @@ def test_state_rejects_total_value_that_does_not_match_prices() -> None:
 def test_domain_values_reject_invalid_input(factory, value) -> None:
     with pytest.raises(DomainValidationError):
         if factory is PortfolioConfig:
-            factory(name=value, portfolio_type=PortfolioType.CONTROL, starting_cash="1", control_ticker="AAPL")
+            factory(
+                name=value,
+                portfolio_type=PortfolioType.CONTROL,
+                starting_cash="1",
+                control_ticker="AAPL",
+            )
         else:
             factory(value)
 
@@ -87,6 +91,11 @@ def test_trade_and_experiment_serialize_with_typed_rules() -> None:
     }
 
 
+def test_string_enums_render_as_their_serialized_values() -> None:
+    assert str(Action.BUY) == "buy"
+    assert str(PortfolioType.CONTROL) == "control"
+
+
 def test_experiment_dates_and_portfolio_names_are_validated() -> None:
     with pytest.raises(DomainValidationError, match="end date"):
         Experiment(name="x", start_date=date(2026, 5, 2), end_date=date(2026, 5, 1), portfolios=())
@@ -106,4 +115,3 @@ def test_experiment_dates_and_portfolio_names_are_validated() -> None:
 def test_today_et_uses_eastern_time_and_dst() -> None:
     assert today_et(datetime(2026, 3, 8, 4, 30, tzinfo=ZoneInfo("UTC"))) == date(2026, 3, 7)
     assert today_et(datetime(2026, 3, 8, 5, 30, tzinfo=ZoneInfo("UTC"))) == date(2026, 3, 8)
-
