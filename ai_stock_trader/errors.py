@@ -7,3 +7,11 @@ class DomainValidationError(ValueError):
 
 class StorageError(Exception):
     """An experiment file is missing, malformed, unsafe, or cannot be persisted."""
+
+
+class ConfigurationError(Exception):
+    """Required runtime configuration is missing or invalid."""
+
+
+class MarketDataError(Exception):
+    """Finnhub data is unavailable, malformed, or unsafe to use."""
