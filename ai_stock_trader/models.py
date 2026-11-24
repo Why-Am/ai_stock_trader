@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from enum import StrEnum
+from typing import cast
 from zoneinfo import ZoneInfo
 
 from .errors import DomainValidationError
@@ -147,9 +148,11 @@ class Experiment:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", _name(self.name, "experiment name"))
-        if not isinstance(self.start_date, date) or isinstance(self.start_date, datetime):
+        start_date = cast(object, self.start_date)
+        end_date = cast(object, self.end_date)
+        if not isinstance(start_date, date) or isinstance(start_date, datetime):
             raise DomainValidationError("start date must be a calendar date")
-        if not isinstance(self.end_date, date) or isinstance(self.end_date, datetime):
+        if not isinstance(end_date, date) or isinstance(end_date, datetime):
             raise DomainValidationError("end date must be a calendar date")
         if self.end_date < self.start_date:
             raise DomainValidationError("end date must be on or after start date")
@@ -220,7 +223,7 @@ class AIDecision:
 @dataclass(frozen=True)
 class PortfolioState:
     cash: Decimal
-    holdings: Mapping[Ticker, Decimal] = field(default_factory=dict)
+    holdings: Mapping[Ticker, Decimal] = field(default_factory=dict[Ticker, Decimal])
     total_value: Decimal | None = None
     prices: Mapping[Ticker, Decimal] | None = None
 

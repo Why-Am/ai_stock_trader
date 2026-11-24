@@ -56,5 +56,6 @@ line-ending = "auto"
 [tool.pyright]
 include = ["ai_stock_trader"]
 exclude = ["**/__pycache__"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 pythonVersion = "3.14"
+stubPath = "typings"

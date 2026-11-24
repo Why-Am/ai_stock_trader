@@ -127,7 +127,7 @@ class FinnhubMarketData:
         try:
             if not isinstance(response, list):
                 raise ValueError("response must be a list")
-            return tuple(_news_item(item) for item in response)
+            return tuple(_news_item(item) for item in cast(list[object], response))
         except (KeyError, TypeError, ValueError, OverflowError) as exc:
             raise MarketDataError(f"invalid market news response: {exc}") from exc
 
@@ -164,7 +164,7 @@ class FinnhubMarketData:
 def _mapping(value: object, label: str) -> Mapping[str, object]:
     if not isinstance(value, Mapping):
         raise ValueError(f"{label} response must be an object")
-    return value
+    return cast(Mapping[str, object], value)
 
 
 def _timestamp(value: object) -> datetime:

@@ -14,7 +14,7 @@ import tempfile
 from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .errors import DomainValidationError, StorageError
 from .models import Experiment, PortfolioConfig, PortfolioState, Trade
@@ -125,15 +125,18 @@ class ExperimentStorage:
     def _parse_metadata(metadata: Any, directory: Path) -> Experiment:
         if not isinstance(metadata, dict):
             raise StorageError("experiment metadata must be an object")
+        metadata = cast(dict[str, object], metadata)
         required = {"name", "start_date", "end_date", "portfolios"}
         if set(metadata) != required or metadata["name"] != directory.name:
             raise StorageError("experiment metadata has invalid fields or name")
         if not isinstance(metadata["portfolios"], list):
             raise StorageError("experiment portfolios must be a list")
         portfolios: list[PortfolioConfig] = []
-        for item in metadata["portfolios"]:
+        for raw_item in cast(list[object], metadata["portfolios"]):
+            item = raw_item
             if not isinstance(item, dict):
                 raise StorageError("portfolio metadata must be an object")
+            item = cast(dict[str, object], item)
             try:
                 portfolio_type = item["type"]
                 kwargs: dict[str, Any] = {
@@ -178,7 +181,7 @@ class ExperimentStorage:
         missing = expected - actual
         unexpected = actual - expected
         if missing or unexpected:
-            details = []
+            details: list[str] = []
             if missing:
                 details.append(f"missing {sorted(missing)}")
             if unexpected:
