@@ -59,7 +59,7 @@ The exact module names may change during implementation, but the boundaries shou
 - Add path/name validation to prevent a name from escaping the experiment root or colliding ambiguously with another portfolio.
 - Define how existing files are handled during creation: reject collisions by default rather than silently overwriting data.
 
-### 3. Build the trading/state-transition layer
+### ~~3. Build the trading/state-transition layer~~ (Done)
 
 - Implement buy and sell calculations for fractional shares with no fees.
 - Reject invalid trades before mutation: unknown ticker, nonpositive quantity, insufficient cash for a buy, or insufficient holdings for a sell.
