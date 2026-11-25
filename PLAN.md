@@ -67,7 +67,7 @@ The exact module names may change during implementation, but the boundaries shou
 - Provide control-portfolio initialization that spends all available cash on the configured stock using the current quote; record the resulting holdings and residual balance deterministically.
 - Provide valuation logic that uses current quotes and handles missing/invalid market data as a clear failure.
 
-### 4. Add the Finnhub adapter
+### ~~4. Add the Finnhub adapter~~ (Done)
 
 - Load `FINNHUB_API_KEY` at startup and fail fast with a clear message if it is absent.
 - Wrap the required Finnhub operations only: market status, market news, and current quote.
