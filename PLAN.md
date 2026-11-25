@@ -75,7 +75,7 @@ The exact module names may change during implementation, but the boundaries shou
 - Keep the adapter injectable behind protocols/interfaces so tests can provide a fake client and assert exact calls without network access.
 - Centralize retry/error translation and never include the API key in exception text, logs, CSV files, or experiment data.
 
-### 5. Add AI decision handling
+### ~~5. Add AI decision handling~~ (Done)
 
 - Load `OPENROUTER_API_KEY` at startup and fail fast when it is missing.
 - Use the OpenRouter Agents SDK and the required model `nvidia/nemotron-3.5-lightning`.

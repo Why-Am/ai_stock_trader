@@ -15,3 +15,7 @@ class ConfigurationError(Exception):
 
 class MarketDataError(Exception):
     """Finnhub data is unavailable, malformed, or unsafe to use."""
+
+
+class AIDecisionError(Exception):
+    """An AI decision could not be obtained, parsed, or safely applied."""
