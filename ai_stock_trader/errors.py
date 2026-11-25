@@ -19,3 +19,7 @@ class MarketDataError(Exception):
 
 class AIDecisionError(Exception):
     """An AI decision could not be obtained, parsed, or safely applied."""
+
+
+class DailyRunError(Exception):
+    """An operational daily-run failure with experiment/portfolio context."""

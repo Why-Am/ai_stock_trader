@@ -85,7 +85,7 @@ The exact module names may change during implementation, but the boundaries shou
 - Retry the complete “decision then validation/execution” attempt up to three times when a proposed set of trades fails. After the third failure, raise a CI-reportable error containing the reason without exposing credentials.
 - Make the AI client injectable and test tool-call sequencing, malformed responses, retry limits, and successful responses with fakes.
 
-### 6. Implement idempotent daily orchestration
+### ~~6. Implement idempotent daily orchestration~~ (Done)
 
 Run the workflow in the specification’s order:
 

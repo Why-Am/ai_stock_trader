@@ -10,6 +10,7 @@ import csv
 import io
 import json
 import os
+import re
 import tempfile
 from collections.abc import Iterable
 from datetime import date
@@ -226,6 +227,94 @@ class ExperimentStorage:
             for trade in trades
         ]
         self._append_csv(path, TRADE_HEADERS, rows)
+
+    def has_state_for_date(self, directory: Path | str, portfolio_name: str, day: date) -> bool:
+        path = self._portfolio_file(directory, portfolio_name, "_state.csv")
+        with path.open(newline="", encoding="utf-8") as handle:
+            return any(row.get("date") == day.isoformat() for row in csv.DictReader(handle))
+
+    def has_trades_for_date(self, directory: Path | str, portfolio_name: str, day: date) -> bool:
+        path = self._portfolio_file(directory, portfolio_name, "_trades.csv")
+        with path.open(newline="", encoding="utf-8") as handle:
+            return any(row.get("date") == day.isoformat() for row in csv.DictReader(handle))
+
+    def load_snapshot(self, experiment_name: str, portfolio_name: str) -> PortfolioState | None:
+        path = self._snapshot_path(experiment_name, portfolio_name)
+        if not path.exists():
+            return None
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            return PortfolioState(
+                cash=raw["cash"], holdings=raw["holdings"], prices=raw.get("prices")
+            )
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            raise StorageError(
+                f"invalid portfolio snapshot for {experiment_name}/{portfolio_name}"
+            ) from exc
+
+    def save_snapshot(
+        self,
+        experiment_name: str,
+        portfolio_name: str,
+        state: PortfolioState,
+        *,
+        processed_date: date | None = None,
+    ) -> None:
+        if state.prices is None:
+            # Persist only the account state; quotes are refreshed on each run.
+            payload = {
+                "cash": f"{state.cash:.2f}",
+                "holdings": {
+                    str(ticker): f"{quantity:.6f}" for ticker, quantity in state.holdings.items()
+                },
+            }
+        else:
+            payload = {
+                "cash": f"{state.cash:.2f}",
+                "holdings": {
+                    str(ticker): f"{quantity:.6f}" for ticker, quantity in state.holdings.items()
+                },
+                "prices": {str(ticker): f"{price:.2f}" for ticker, price in state.prices.items()},
+            }
+        if processed_date is not None:
+            payload["processed_date"] = processed_date.isoformat()
+        path = self._snapshot_path(experiment_name, portfolio_name)
+        _atomic_text(path, json.dumps(payload, sort_keys=True) + "\n")
+
+    def was_processed(self, experiment_name: str, portfolio_name: str, day: date) -> bool:
+        path = self._snapshot_path(experiment_name, portfolio_name)
+        if not path.exists():
+            return False
+        try:
+            return (
+                json.loads(path.read_text(encoding="utf-8")).get("processed_date")
+                == day.isoformat()
+            )
+        except (OSError, ValueError, TypeError) as exc:
+            raise StorageError(
+                f"invalid portfolio snapshot for {experiment_name}/{portfolio_name}"
+            ) from exc
+
+    def move_to_finished(self, directory: Path | str) -> Path:
+        """Rename within the experiments root so finalization is one filesystem operation."""
+        source = Path(directory)
+        target = self.finished / source.name
+        self.finished.mkdir(parents=True, exist_ok=True)
+        if target.exists():
+            raise StorageError(f"finished experiment already exists: {source.name}")
+        try:
+            os.replace(source, target)
+        except OSError as exc:
+            raise StorageError(f"could not finalize experiment {source.name!r}: {exc}") from exc
+        return target
+
+    def _snapshot_path(self, experiment_name: str, portfolio_name: str) -> Path:
+        # Domain names are validated before becoming path components.
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _-]*", experiment_name):
+            raise StorageError("invalid experiment name for portfolio snapshot")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _-]*", portfolio_name):
+            raise StorageError("invalid portfolio name for snapshot")
+        return self.root / ".daily_state" / experiment_name / f"{portfolio_name}.json"
 
     def _portfolio_file(self, directory: Path | str, portfolio_name: str, suffix: str) -> Path:
         directory = Path(directory)
