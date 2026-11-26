@@ -9,7 +9,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+# Serialize scheduled and manually started runs so they cannot overwrite each other's data.
+concurrency:
+  group: daily-experiment-run-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   daily-run:
@@ -33,3 +38,17 @@ jobs:
         env:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      - name: Commit experiment data
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -d experiments ]; then
+            git add -A -- experiments/
+          fi
+          if git diff --cached --quiet; then
+            echo "No experiment data changes to commit."
+          else
+            git commit -m "Persist daily experiment data"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
