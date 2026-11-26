@@ -1,0 +1,35 @@
+name: Daily experiment run
+
+on:
+  # GitHub cron is UTC. These two slots cover 3:30 PM Eastern Standard and Daylight Time;
+  # run_daily.py checks local ET time so only the matching slot starts the workflow.
+  schedule:
+    - cron: "30 19 * * *"
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  daily-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: Run experiments
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            uv run python run_daily.py --scheduled
+          else
+            uv run python run_daily.py
+          fi
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}

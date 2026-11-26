@@ -102,7 +102,7 @@ For idempotency, define a daily-run marker or inspect the relevant CSV records b
 
 The exact meaning of “starting” and “ending” on a date should be implemented consistently as inclusive (`start_date <= today`, `end_date <= today`) and covered by boundary tests. Finalization must not prevent already-due experiment records from being complete and auditable.
 
-### 7. Add command-line entry points and GitHub Actions
+### ~~7. Add command-line entry points and GitHub Actions~~
 
 - `create_new_experiment.py` should accept or prompt for the experiment name, inclusive start/end dates, and one or more portfolios.
 - Validate end date ordering, portfolio uniqueness, starting money, portfolio type, required strategy/control ticker fields, and control tickers via Finnhub quote lookup.
