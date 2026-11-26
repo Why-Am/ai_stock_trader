@@ -3,7 +3,59 @@ name = "ai-stock-trader"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
-    "finnhub-python>=2.4.29",
+    "finnhub-python>=2.4.30",
+    "openrouter-agent-sdk>=0.8.2",
+    "tzdata>=2025.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.390",
+    "pytest>=9.2.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "--strict-markers --strict-config"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["ai_stock_trader"]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["ai_stock_trader", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "RUF",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "auto"
+
+[tool.pyright]
+include = ["ai_stock_trader"]
+exclude = ["**/__pycache__"]
+typeCheckingMode = "strict"
+pythonVersion = "3.14"
+stubPath = "typings"
