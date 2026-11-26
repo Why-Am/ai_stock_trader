@@ -1,0 +1,19 @@
+{
+  "end_date": "2027-01-01",
+  "name": "AI_vs_S_and_P_500",
+  "portfolios": [
+    {
+      "name": "AI",
+      "starting_cash": "1000.00",
+      "strategy": "Make as much money as possible",
+      "type": "ai-managed"
+    },
+    {
+      "control_ticker": "VOO",
+      "name": "Control",
+      "starting_cash": "1000.00",
+      "type": "control"
+    }
+  ],
+  "start_date": "2026-11-27"
+}
