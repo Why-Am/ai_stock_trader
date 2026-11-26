@@ -58,9 +58,10 @@ def collect_experiment(input_fn: Callable[[str], str], market: FinnhubMarketData
         starting_cash = _ask("Starting money: ", input_fn)
         if portfolio_type is PortfolioType.CONTROL:
             ticker = Ticker(_ask("Control ticker: ", input_fn))
-            # Quote lookup validates that Finnhub recognizes the ticker and has a usable price.
+            # Validate the symbol without requiring a live-session quote; Finnhub's
+            # latest quote is normally the prior close when the market is shut.
             try:
-                market.quote(ticker)
+                market.validate_ticker(ticker)
             except Exception as exc:
                 # Vendor-specific quote failures are presented as a clear validation failure.
                 raise MarketDataError(f"could not validate control ticker {ticker}: {exc}") from exc

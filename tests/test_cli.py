@@ -20,6 +20,9 @@ class FakeMarket:
             raise RuntimeError("unavailable")
         return Quote(symbol, Decimal("10"), datetime.now().astimezone())
 
+    def validate_ticker(self, ticker: Ticker | str) -> None:
+        self.quote(ticker)
+
 
 def test_creation_prompts_validates_ticker_then_creates(tmp_path, monkeypatch) -> None:
     answers = iter(["Study", "2026-01-01", "2026-01-03", "1", "Index", "control", "100", "AAPL"])

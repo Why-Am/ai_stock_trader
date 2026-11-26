@@ -132,6 +132,13 @@ class FinnhubMarketData:
             raise MarketDataError(f"invalid market news response: {exc}") from exc
 
     def quote(self, ticker: Ticker | str) -> Quote:
+        return self._quote(ticker, require_fresh=True)
+
+    def validate_ticker(self, ticker: Ticker | str) -> None:
+        """Check Finnhub recognizes the symbol without requiring a live-session quote."""
+        self._quote(ticker, require_fresh=False)
+
+    def _quote(self, ticker: Ticker | str, *, require_fresh: bool) -> Quote:
         normalized = Ticker(str(ticker))
         response = self._call("quote", lambda: self._client.quote(str(normalized)))
         try:
@@ -143,8 +150,10 @@ class FinnhubMarketData:
             if isinstance(current, float) and not math.isfinite(current):
                 raise ValueError("current price must be finite")
             age = self._now() - timestamp
-            if age < timedelta(0) or age > self._max_quote_age:
-                raise ValueError("quote is stale")
+            # Freshness matters for trading. Ticker validation only checks that
+            # Finnhub returns a usable price; the last close is expected off-hours.
+            if require_fresh and (age < timedelta(0) or age > self._max_quote_age):
+                raise ValueError(f"quote is stale (age: {age})")
             return Quote(normalized, Decimal(str(current)), timestamp)
         except (KeyError, TypeError, ValueError, OverflowError) as exc:
             raise MarketDataError(f"invalid quote response for {normalized}: {exc}") from exc

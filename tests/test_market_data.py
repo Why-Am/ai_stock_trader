@@ -100,6 +100,15 @@ def test_quote_rejects_missing_zero_and_stale_values() -> None:
             adapter.quote("AAPL")
 
 
+def test_ticker_validation_accepts_a_stale_quote_but_checks_price() -> None:
+    fake = FakeFinnhub()
+    fake.quote_response = {"c": 123.45, "t": 1_799_999_000}
+
+    make_adapter(fake).validate_ticker("AAPL")
+
+    assert fake.calls == [("quote", ("AAPL",))]
+
+
 def test_malformed_status_and_news_are_reported() -> None:
     fake = FakeFinnhub()
     adapter = make_adapter(fake)
