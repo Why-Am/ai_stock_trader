@@ -111,7 +111,7 @@ The exact meaning of “starting” and “ending” on a date should be impleme
 - Add a GitHub Actions workflow scheduled for `15:30` ET equivalent in UTC, plus a manual dispatch option. Document that GitHub Actions cron is UTC and account for daylight-saving changes rather than hard-coding a single UTC time if exact 3:30 PM ET is required year-round.
 - Keep API keys in GitHub Actions Secrets and pass them only as environment variables.
 
-### 8. Documentation and operational safeguards
+### ~~8. Documentation and operational safeguards~~
 
 - Replace the empty README with setup, `.env` usage for local development, experiment layout, creation, daily-run behavior, and failure/retry semantics.
 - Document the data format and the immutability rule for strategy files.

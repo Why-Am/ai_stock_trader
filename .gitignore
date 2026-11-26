@@ -221,3 +221,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Runtime lock files are temporary and must never become experiment records.
+experiments/.daily_run.lock
