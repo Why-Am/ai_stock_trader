@@ -62,7 +62,7 @@ Run the workflow once for the current Eastern Time date:
 uv run python run_daily.py
 ```
 
-To use a different experiment root, pass `--experiments-root`. Scheduled runs use `--scheduled`; this ignores the alternate UTC cron slot unless it corresponds to 3:30 PM Eastern Time. The workflow has separate 19:30 UTC and 20:30 UTC schedules to cover standard and daylight time because GitHub cron uses UTC. Manual workflow dispatch runs immediately.
+To use a different experiment root, pass `--experiments-root`. Scheduled runs use `--scheduled`; this ignores the alternate UTC cron slot unless it corresponds to 9:30 AM Eastern Time. The workflow has separate 13:30 UTC and 14:30 UTC schedules to cover daylight and standard time because GitHub cron uses UTC. Manual workflow dispatch runs immediately.
 
 The runner first finalizes experiments whose inclusive end date has arrived, then checks whether the market is open. On an open market day, it initializes starting control portfolios by investing their available cash, then records the daily state and processes AI portfolios. Finalization uses the last successfully saved quote values so it can finish after market close. Dates and schedule checks use `America/New_York` (Eastern Time), not the machine's local timezone.
 

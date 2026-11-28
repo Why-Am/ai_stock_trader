@@ -1,11 +1,11 @@
 name: Daily experiment run
 
 on:
-  # GitHub cron is UTC. These two slots cover 3:30 PM Eastern Standard and Daylight Time;
+  # GitHub cron is UTC. These two slots cover 9:30 AM Eastern Standard and Daylight Time;
   # run_daily.py checks local ET time so only the matching slot starts the workflow.
   schedule:
-    - cron: "30 19 * * *"
-    - cron: "30 20 * * *"
+    - cron: "30 13 * * *"
+    - cron: "30 14 * * *"
   workflow_dispatch:
 
 permissions:

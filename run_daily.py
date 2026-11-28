@@ -34,10 +34,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--scheduled",
         action="store_true",
-        help="skip duplicate UTC cron invocation outside 3:30 PM ET",
+        help="skip duplicate UTC cron invocation outside 9:30 AM ET",
     )
     args = parser.parse_args(argv)
-    if args.scheduled and datetime.now(ZoneInfo("America/New_York")).strftime("%H:%M") != "15:30":
+    if args.scheduled and datetime.now(ZoneInfo("America/New_York")).strftime("%H:%M") != "09:30":
         return 0
     try:
         build_runner(args.experiments_root).run()

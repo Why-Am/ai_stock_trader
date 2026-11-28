@@ -44,7 +44,7 @@ Fractional shares are allowed and fees are disregarded for simplicity.
 
 ## Daily Run
 
-A Github Actions job runs at 3:30 PM ET every day.
+A Github Actions job runs at 9:30 AM ET every day.
 
 First, it checks if the current date is greater than or equal to any of the end dates of the experiments. If so, it records the final state of those experiments and ends them.
 
